@@ -1,0 +1,200 @@
+<html style="width: 100%; height:100%; overflow:none;">
+   <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>Lingua -- Language Flashcards</title>
+      <meta name="description" content="Learn a new language using curated flashcards">
+      <!-- FB Meta Tags -->
+      <meta property="og:url" content="https://jgarreffa112.github.io/lingua/">
+      <meta property="og:type" content="website">
+      <meta property="og:title" content="Lingua -- Language Flashcards by Julianna Garreffa">
+      <meta property="og:description" content="Learn a new language using curated flashcards">
+      <!-- <meta property="og:image" content="images/xxx.png"> -->
+      <!-- Twitter Meta Tags -->
+      <meta name="twitter:card" content="summary_large_image">
+      <meta property="twitter:domain" content="jgarreffa112.github.io">
+      <meta name="theme-color" content="#000">
+      <!-- <link rel="manifest" href="manifest.json"> -->
+      <!-- <link href="images/32x32.png" rel="icon shortcut" sizes="3232"> -->
+      <!-- <link href="images/192x192.png" rel="apple-touch-icon"> -->
+   </head>
+   <body style="width: 100%;height:100%;overflow: hidden;padding: 10px;margin: 0;box-sizing: border-box;display: flex;align-items: center;justify-content: center;font-family:Helvetica;flex-wrap: wrap;">
+      <div id="deck-app" style="width:100%"></div>
+      <div id="card-app" style="width:100%"></div>
+      <script src="https://amhei02uv3.execute-api.us-east-2.amazonaws.com/default/flashcards"></script>
+      <script>
+         (function() { // protect the lemmings!
+             decks = [{
+                 "name": "Conjunctions",
+                 "cardIDs": Array.from(Object.keys(window.cardData)),
+             }]
+         
+             if (location.search === "") {
+                 loadDeckList()
+             }
+             else {
+                 const rawString = location.search.slice(1)
+                 const [argName, argValue] = rawString.split("=")
+                 if (argName.toLowerCase() !== "deck") {
+                     loadDeckList()
+                 }
+                 else {
+                     loadDeck(argValue)
+                 }
+             }
+         
+             function loadDeck(name) {
+                 const cardApp = document.querySelector("#card-app")
+         
+                 let deck = null
+                 for (const d of decks) {
+                     if (d.name.toLowerCase() === name.toLowerCase()) {
+                         deck = d
+                         break
+                     }
+                 }
+         
+                 if (deck === null) {
+                     loadDeckList()
+                     return
+                 }
+         
+                 const title = document.createElement("h1")
+                 title.innerHTML = name
+                 title.style = `
+                     text-align: center;
+                 `
+                 cardApp.appendChild(title)
+         
+                 const back = document.createElement("button")
+                 back.innerHTML = "Back to Deck List"
+                 back.addEventListener('click', function(e) {
+                     window.history.back()
+                 })
+                 cardApp.appendChild(back)
+                 console.log(deck)
+         
+                 /*
+                     [id1, id2, id3]
+                     new = []
+         
+                     => cpy(id1, id2, i3d)
+                     random => 1 new = [{id2,...}]
+                     [id1, id3]
+                     random => 0 new = [{id2,...}, {id1,...}]
+                     [id3]
+                     random => 0 new = [{id2,...}, {id1,...}, {id3,...}]
+                 */
+         
+                 let copy = deck.cardIDs.slice(0)
+                 const randomized = []
+                 while (copy.length > 0) {
+                     const idx = Math.floor(Math.random()*copy.length)
+                     randomized.push(window.cardData[copy[idx]])
+                     //console.log(copy[idx])
+                     copy = copy.slice(0, idx).concat(copy.slice(idx+1))
+                     //console.log(copy)
+                 }
+                 console.log(deck.cardIDs)
+                 console.log(randomized)
+         
+                 function loadCard() {
+                     const cardWrapper = document.createElement("div")
+                     const card = document.createElement("div")
+                     let back = false
+                     const ogStyle = `width: 100%;height: 300px;box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);display: flex;justify-content: center;align-items: center;font-size: 200%;font-family: helvetica;text-align: center;padding: 20px;box-sizing: border-box;`
+                     card.style = ogStyle
+                     card.innerHTML = randomized[0].to_translate
+                     cardWrapper.appendChild(card)
+                     cardApp.appendChild(cardWrapper)
+         
+                     const button = document.createElement("button")
+                     button.innerHTML = "Next"
+                     if (randomized.length === 1) {
+                         button.setAttribute("disabled", "disabled")
+                     }
+                     button.style = `
+                         box-shadow: rgb(0 0 0 / 20%) 0px 4px 8px 0px;
+                         background: none;
+                         margin:  20px 0;
+                         padding: 20px;
+                         width: 100%;
+                         border: none;
+                         font-size: 110%;
+                     `
+                     cardWrapper.appendChild(button)
+         
+                     button.addEventListener("click", function(e) {
+         
+                         console.log(e)
+                         randomized.shift()
+                         cardWrapper.parentNode.removeChild(cardWrapper)
+                         loadCard()
+                     })
+         
+                     card.addEventListener("click", function(e) {
+                         console.log(e)
+                         if (!back) {
+                             card.innerHTML = randomized[0].answer
+                             card.style = ogStyle + `background: black; color: white;`
+                             back = true
+                         }
+                         else {
+                             card.innerHTML = randomized[0].to_translate
+                             card.style = ogStyle + `background: white; color: black;`
+                             back = false
+                         }
+                         
+                     })
+         
+         
+                 }
+         
+                 loadCard()
+             }
+         
+             function loadDeckList() {
+                 const deckApp = document.querySelector("#deck-app")
+                 const title = document.createElement("h1")
+                 title.innerHTML = "Decks"
+                 title.style = `text-align: center;`
+                 deckApp.appendChild(title)
+         
+                 for (const deck of decks) {
+                     console.log(deck)
+                     const name = deck.name
+                     const len = deck.cardIDs.length
+                     const nameTag = document.createElement("strong")
+                     nameTag.innerHTML = name
+                     const cardsTag = document.createElement("span")
+                     cardsTag.innerHTML = `${len} cards`//len + " cards"
+                     
+                     // console.log(label)
+                     
+                     const row = document.createElement("div")
+                     row.style = `
+                         display: flex;
+                         justify-content: space-between;
+                         box-sizing: border-box;
+                         padding: 15px 10px;
+                         box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+                     `;
+                     row.appendChild(nameTag)
+                     row.appendChild(cardsTag)
+         
+                     row.addEventListener("click", function(e) {
+                         console.log(e)
+                         location.search = "?deck=" + name
+                     })
+         
+                     deckApp.appendChild(row)
+                 }
+             } // load deck-app
+         
+         
+         
+         
+         })()
+      </script>
+   </body>
+</html>
