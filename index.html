@@ -24,10 +24,11 @@
       <script src="https://amhei02uv3.execute-api.us-east-2.amazonaws.com/default/flashcards"></script>
       <script>
          (function() { // protect the lemmings!
-             decks = [{
-                 "name": "Conjunctions",
-                 "cardIDs": Array.from(Object.keys(window.cardData)),
-             }]
+             // decks = [{
+             //     "name": "Conjunctions",
+             //     "cardIDs": Array.from(Object.keys(window.cardData)),
+             // }]
+             decks = window.decks
          
              if (location.search === "") {
                  loadDeckList()
